@@ -5,6 +5,8 @@ WebSocket server for scheduling automated C program builds.
 Requirements
 ------------
  * [NodeJS](https://nodejs.org/) 12+
+ * [git](https://git-scm.com/)
+ * make
 
 Installation
 ------------
@@ -41,6 +43,23 @@ in the following directories:
 Storage
 -------
 The state of registered programs is stored in the file: `./registry.json`
+
+Program artifacts are stored in `ARTIFACTS_PATH`, according to git revision in a
+structure similar to:
+```
+ARTIFACTS_PATH/
+├── program-a/
+│   ├── cf9ead2/
+│   │   ├── program-a
+│   │   └── program-a.o
+│   └── d36c616/
+│       ├── program-a
+│       └── program-a.o
+└── program-b/
+    └── e47d727/
+        ├── program-b
+        └── program-b.o
+```
 
 Development & Tests
 -------------------
