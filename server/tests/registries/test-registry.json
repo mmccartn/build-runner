@@ -1,0 +1,10 @@
+{
+    "goodby": {
+        "status": "failed",
+        "path": "bad/path"
+    },
+    "hello": {
+        "status": "completed",
+        "path": "../data/hello"
+    }
+}

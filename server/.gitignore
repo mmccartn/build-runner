@@ -1,0 +1,5 @@
+artifacts
+registry.json
+tests/artifacts
+tests/data
+tests/registries/tmp-registry.json

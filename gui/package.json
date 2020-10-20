@@ -1,0 +1,35 @@
+{
+    "name": "build-runner-gui",
+    "version": "0.1.0",
+    "description": "Build runner GUI",
+    "private": true,
+    "scripts": {
+        "build": "webpack --env production --progress",
+        "dev": "webpack serve --hot"
+    },
+    "author": "Matt McCartney <mattsmccartney@gmail.com>",
+    "license": "MIT",
+    "dependencies": {
+        "vue": "^3.0.0",
+        "vue-router": "^4.0.0-beta.11"
+    },
+    "devDependencies": {
+        "@babel/core": "^7.11.6",
+        "@babel/preset-env": "^7.11.5",
+        "@vue/compiler-sfc": "^3.0.0",
+        "babel-loader": "^8.1.0",
+        "css-loader": "^4.3.0",
+        "file-loader": "^6.1.1",
+        "sass": "^1.27.0",
+        "sass-loader": "^10.0.3",
+        "vue-hot-reload-api": "^2.3.4",
+        "vue-html-loader": "^1.2.4",
+        "vue-loader": "^16.0.0-beta.7",
+        "vue-style-loader": "^4.1.2",
+        "vue-template-compiler": "^2.6.12",
+        "webpack": "^5.0.0",
+        "webpack-cli": "^4.0.0",
+        "webpack-dev-server": "^3.11.0",
+        "ws-plus": "^1.1.1"
+    }
+}

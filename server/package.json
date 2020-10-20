@@ -1,0 +1,35 @@
+{
+  "name": "build-server",
+  "version": "0.1.0",
+  "description": "C program build server",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "test": "jest -iu --colors",
+    "start": "./index.js"
+  },
+  "author": "Matt McCartney <mattsmccartney@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "argparse": "^2.0.1",
+    "ws-plus": "^1.1.1"
+  },
+  "devDependencies": {
+    "jest": "^26.4.2"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverage": true,
+    "coverageReporters": [
+      "text"
+    ],
+    "coveragePathIgnorePatterns": [
+      "./node_modules/*",
+      "./tests/*"
+    ],
+    "modulePathIgnorePatterns": [
+      "./*.json"
+    ],
+    "verbose": true
+  }
+}

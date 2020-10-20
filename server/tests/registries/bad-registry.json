@@ -1,0 +1,6 @@
+{
+    "hello": {
+        "status": "completed",
+        path: "../data/hello"
+    }
+}
