@@ -4,7 +4,7 @@ WebSocket server for scheduling automated C program builds.
 
 Requirements
 ------------
- * [NodeJS](https://nodejs.org/) 10+
+ * [NodeJS](https://nodejs.org/) 12+
 
 Installation
 ------------

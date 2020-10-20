@@ -4,7 +4,7 @@ Single page website for registering programs and viewing the status of builds.
 
 Requirements
 ------------
- * [NodeJS](https://nodejs.org/) 10+
+ * [NodeJS](https://nodejs.org/) 12+
 
 Installation
 ------------
