@@ -93,7 +93,7 @@ if (require.main === module) {
     const args = parser.parse_args()
 
     // start the WebSocket server
-    const server = new Server({ port: args.port })
+    const server = new Server({ port: args.port, host: '0.0.0.0' })
 
     // stop gracefully when interupted
     process.on('SIGINT', async () => {
