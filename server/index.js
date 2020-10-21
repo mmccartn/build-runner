@@ -16,8 +16,9 @@ const main = async function (
     registryPath,
     Pipeline
 ) {
-    // create the artifacts storage directory in case it doesn't already exist
+    // create the storage directories in case either doesn't already exist
     await mkdir(artifacts_path, { recursive: true })
+    await mkdir(path.dirname(registryPath), { recursive: true })
 
     const registry = new Registry(registryPath)
     await registry.setup()
