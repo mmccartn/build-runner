@@ -1,5 +1,9 @@
+const { rmdirSync } = require('fs')
 const Pipeline = require('../src/pipeline.js')
 const path = require('path')
+
+const ARTIFACTS_PATH = path.join(__dirname, 'artifacts')
+const TEST_PROG_PATH = path.join(__dirname, 'test-prog')
 
 const MockGit = function(willFail=false) {
     return {
@@ -25,6 +29,8 @@ const MockMake = function(willFail=false) {
     }
 }
 
+afterEach(() => rmdirSync(ARTIFACTS_PATH, { recursive: true }))
+
 it('should run the pipeline', async () => {
     const pipeline = new Pipeline()
     pipeline._git = MockGit()
@@ -33,8 +39,8 @@ it('should run the pipeline', async () => {
         let msg
         await pipeline.run(
             'test-prog',
-            path.join(__dirname, 'test-prog'),
-            path.join(__dirname, 'artifacts'),
+            TEST_PROG_PATH,
+            ARTIFACTS_PATH,
             out => msg = out
         )
         resolve(msg)
@@ -49,8 +55,8 @@ it('should run the pipeline even if git pull fails', async () => {
         let msg
         await pipeline.run(
             'test-prog',
-            path.join(__dirname, 'test-prog'),
-            path.join(__dirname, 'artifacts'),
+            TEST_PROG_PATH,
+            ARTIFACTS_PATH,
             err => msg = err
         )
         resolve(msg)

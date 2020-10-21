@@ -1,10 +1,12 @@
+const { promises: { mkdir }, rmdirSync } = require('fs')
 const Registry = require('../src/registry.js')
 const path = require('path')
 
 const REG_DIR = path.join(__dirname, 'registries')
+const TMP_REG_DIR = path.join(__dirname, 'tmp-registries')
 const REGISTRY_PATH = path.join(REG_DIR, 'test-registry.json')
 const BAD_REGISTRY_PATH = path.join(REG_DIR, 'bad-registry.json')
-const TMP_REGISTRY_PATH = path.join(REG_DIR, 'tmp-registry.json')
+const TMP_REGISTRY_PATH = path.join(TMP_REG_DIR, 'tmp-registry.json')
 
 it('should construct a new make process object', () => {
     const registry = new Registry(REGISTRY_PATH)
@@ -84,18 +86,22 @@ it('should get list of registered programs', async () => {
         { program: 'hello', status: 'completed' }
     ])
 })
-it('should save the registry to a file', async () => {
-    const registry = new Registry(TMP_REGISTRY_PATH)
-    registry._registry = {
-        goodby: { status: 'failed', path: 'bad/path' },
-        hello: { status: 'completed', path: '../data/hello' }
-    }
-    await registry.save()
-    await registry.setup()
-    expect(registry.programs).toStrictEqual([
-        { program: 'goodby', status: 'failed' },
-        { program: 'hello', status: 'completed' }
-    ])
+describe('Storage', () => {
+    beforeEach(() => mkdir(TMP_REG_DIR))
+    afterEach(() => rmdirSync(TMP_REG_DIR, { recursive: true }))
+    it('should save the registry to a file', async () => {
+        const registry = new Registry(TMP_REGISTRY_PATH)
+        registry._registry = {
+            goodby: { status: 'failed', path: 'bad/path' },
+            hello: { status: 'completed', path: '../data/hello' }
+        }
+        await registry.save()
+        await registry.setup()
+        expect(registry.programs).toStrictEqual([
+            { program: 'goodby', status: 'failed' },
+            { program: 'hello', status: 'completed' }
+        ])
+    })
 })
 describe('Get Program', () => {
     it('should get a registered program by name', async () => {

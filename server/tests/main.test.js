@@ -1,3 +1,4 @@
+const { rmdirSync } = require('fs')
 const EventEmitter = require('events')
 const main = require('../')
 const path = require('path')
@@ -27,6 +28,8 @@ const mockPipeline = function(willFail=false) {
         }
     }
 }
+
+afterEach(() => rmdirSync(ARTIFACTS_PATH, { recursive: true }))
 
 describe('WebSocket Requests', () => {
     it('should send registered programs when a client connects', async () => {
