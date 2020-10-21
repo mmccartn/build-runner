@@ -87,7 +87,8 @@ describe('WebSocket Requests', () => {
         clearInterval(autoBuildInterval)
         registry.update = jest.fn()
         registry.save = jest.fn()
-        server.emit('program/register', { location: 'path/to/prog' }, {})
+        const client = { send: () => {} }
+        server.emit('program/register', { location: 'path/to/prog' }, client)
         await new Promise(resolve => registry.save = resolve)
         expect(
             registry.update

@@ -37,12 +37,12 @@ const main = async function (
         // get the program name from the basename of the program location (path)
         const name = path.basename(location)
         await updateRegistry(name, STATUS.building, location)
+        const onMessage = msg => client.send('build/output', { program: name, msg })
         try {
-            await new Pipeline().run(name, location, artifacts_path, msg => {
-                return client.send('build/output', { program: name, msg })
-            })
+            await new Pipeline().run(name, location, artifacts_path, onMessage)
             await updateRegistry(name, STATUS.completed)
         } catch (err) {
+            await onMessage(err.toString())
             await updateRegistry(name, STATUS.failed)
         }
         return registry.save()
