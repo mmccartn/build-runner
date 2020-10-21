@@ -41,6 +41,7 @@ module.exports = class extends EventEmitter {
         if (!this._childProc) {
             return 0
         } else {
+            this._childProc.removeAllListeners()
             const code = this._childProc.kill()
             this._childProc = null
             return code
