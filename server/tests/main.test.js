@@ -272,4 +272,20 @@ describe('Perdiodic Builds', () => {
         expect(registry.update).not.toHaveBeenCalled()
         clearInterval(autoBuildInterval)
     })
+    it('should perform periodic builds and skip if already building', async () => {
+        const server = new MockServer()
+        const { autoBuildInterval, registry } = await main(
+            server,
+            { artifacts_path: ARTIFACTS_PATH, build_interval: 0.100 },
+            REGISTRY_PATH,
+            mockProject()
+        )
+        registry._registry = {}
+        registry._registry[`prog-${TEST_REV_A}`] = { ...TEST_ENTRY, status: 'building' }
+        registry.save = jest.fn()
+        registry.update = jest.fn()
+        await new Promise(resolve => registry.save = resolve)
+        expect(registry.update).not.toHaveBeenCalled()
+        clearInterval(autoBuildInterval)
+    })
 })

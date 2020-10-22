@@ -73,11 +73,14 @@ const main = async function (
     // schedule automatic asynchronous builds on an interval
     const autoBuildInterval = setInterval(async () => {
         await Promise.all(registry.programs.map(async program => {
-            const { name, revision, location } = program
+            const { name, revision, location, status } = program
             const project = new Project(location)
             if (project.name !== name || !project.exists) {
                 // the program has been (re)moved or renamed
                 return removeRegistry(name, revision, artifacts_path)
+            }
+            if (status === STATUS.building) {
+                return // skip, already being built during registration
             }
             try {
                 await project.update()
