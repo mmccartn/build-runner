@@ -32,7 +32,7 @@ module.exports = class {
      * @param {string} artPath the filesystem path to the artifacts directory
      * @param {function} onMessage callback to receive capture of build stdout
      */
-    async run(revision, artPath, onMessage) {
+    async build(revision, artPath, onMessage) {
         // build the program
         const outPath = path.join(artPath, this.name, revision)
         this._make.on('message', msg => onMessage(`make: ${msg}`))

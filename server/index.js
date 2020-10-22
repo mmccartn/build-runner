@@ -4,7 +4,7 @@ const { description, version } = require('./package.json')
 const { promises: { mkdir }, rmdirSync } = require('fs')
 const { Server } = require('ws-plus')
 const path = require('path')
-const PipelineClass = require('./src/pipeline.js')
+const ProjectClass = require('./src/project.js')
 const Registry = require('./src/registry.js')
 
 const REGISTRY_PATH = path.join(__dirname, 'registry.json')
@@ -14,7 +14,7 @@ const main = async function (
     server,
     { artifacts_path, build_interval },
     registryPath,
-    Pipeline
+    Project
 ) {
     // create the storage directories in case either doesn't already exist
     await mkdir(artifacts_path, { recursive: true })
@@ -42,17 +42,17 @@ const main = async function (
 
     // listen for registration requests
     server.on('program/register', async ({ location }, client) => {
-        const pipeline = new Pipeline(location)
-        const name = pipeline.name
+        const project = new Project(location)
+        const name = project.name
         const onMessage = msg => {
             return client.send('build/output', { program: name, msg })
         }
-        if (!pipeline.exists) {
+        if (!project.exists) {
             return onMessage(`No program found at: ${location}`)
         }
         let revision
         try {
-            revision = await pipeline.revision()
+            revision = await project.revision()
         } catch (err) {
             return onMessage(`Failed to get git revision for: ${name}`)
         }
@@ -61,7 +61,7 @@ const main = async function (
         }
         await updateRegistry(name, revision, STATUS.building, location)
         try {
-            await pipeline.run(revision, artifacts_path, onMessage)
+            await project.build(revision, artifacts_path, onMessage)
             await updateRegistry(name, revision, STATUS.completed)
         } catch (err) {
             await onMessage(err.toString())
@@ -74,26 +74,26 @@ const main = async function (
     const autoBuildInterval = setInterval(async () => {
         await Promise.all(registry.programs.map(async program => {
             const { name, revision, location } = program
-            const pipeline = new Pipeline(location)
-            if (pipeline.name !== name || !pipeline.exists) {
+            const project = new Project(location)
+            if (project.name !== name || !project.exists) {
                 // the program has been (re)moved or renamed
                 return removeRegistry(name, revision, artifacts_path)
             }
             try {
-                await pipeline.update()
+                await project.update()
             } catch (err) {
                 // ignore pull errors in favor of revision comparison
             }
             let newRev
             try {
-                newRev = await pipeline.revision()
+                newRev = await project.revision()
             } catch (err) { // no longer a git repository
                 return removeRegistry(name, revision, artifacts_path)
             }
             if (newRev && !registry.getProgram(name, newRev)) {
                 await updateRegistry(name, newRev, STATUS.building, location)
                 try {
-                    await pipeline.run(newRev, artifacts_path, () => {})
+                    await project.build(newRev, artifacts_path, () => {})
                     await updateRegistry(name, newRev, STATUS.completed)
                 } catch (err) {
                     await updateRegistry(name, newRev, STATUS.failed)
@@ -144,7 +144,7 @@ if (require.main === module) {
 
     // start the application
     console.info(`# Starting ${description}`)
-    main(server, args, REGISTRY_PATH, PipelineClass)
+    main(server, args, REGISTRY_PATH, ProjectClass)
 } else {
     module.exports = main // for testing
 }

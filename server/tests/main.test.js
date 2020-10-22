@@ -22,12 +22,12 @@ class MockServer extends EventEmitter {
         return true
     }
 }
-const mockPipeline = function(willExist=true, rev=TEST_REV_A, willFail=false) {
+const mockProject = function(willExist=true, rev=TEST_REV_A, willFail=false) {
     return class {
         constructor(progPath) {
             this.name = path.basename(progPath)
         }
-        run(revision, artPath, onMessage) {
+        build(revision, artPath, onMessage) {
             if (willFail) {
                 throw new Error('failed')
             } else {
@@ -63,7 +63,7 @@ describe('WebSocket Requests', () => {
             server,
             { artifacts_path: ARTIFACTS_PATH, build_interval: 1 },
             REGISTRY_PATH,
-            mockPipeline()
+            mockProject()
         )
         clearInterval(autoBuildInterval)
         await new Promise((resolve, reject) => {
@@ -81,7 +81,7 @@ describe('WebSocket Requests', () => {
             server,
             { artifacts_path: ARTIFACTS_PATH, build_interval: 1 },
             REGISTRY_PATH,
-            mockPipeline()
+            mockProject()
         )
         clearInterval(autoBuildInterval)
         registry.update = jest.fn()
@@ -109,7 +109,7 @@ describe('WebSocket Requests', () => {
             server,
             { artifacts_path: ARTIFACTS_PATH, build_interval: 1 },
             REGISTRY_PATH,
-            mockPipeline(false)
+            mockProject(false)
         )
         clearInterval(autoBuildInterval)
         await new Promise((resolve, reject) => {
@@ -126,7 +126,7 @@ describe('WebSocket Requests', () => {
             server,
             { artifacts_path: ARTIFACTS_PATH, build_interval: 1 },
             REGISTRY_PATH,
-            mockPipeline(true, false)
+            mockProject(true, false)
         )
         clearInterval(autoBuildInterval)
         await new Promise((resolve, reject) => {
@@ -143,7 +143,7 @@ describe('WebSocket Requests', () => {
             server,
             { artifacts_path: ARTIFACTS_PATH, build_interval: 1 },
             REGISTRY_PATH,
-            mockPipeline()
+            mockProject()
         )
         clearInterval(autoBuildInterval)
         registry.getProgram = () => true
@@ -161,7 +161,7 @@ describe('WebSocket Requests', () => {
             server,
             { artifacts_path: ARTIFACTS_PATH, build_interval: 1 },
             REGISTRY_PATH,
-            mockPipeline(true, TEST_REV_A, true)
+            mockProject(true, TEST_REV_A, true)
         )
         clearInterval(autoBuildInterval)
         registry.update = jest.fn()
@@ -186,7 +186,7 @@ describe('Perdiodic Builds', () => {
             server,
             { artifacts_path: ARTIFACTS_PATH, build_interval: 0.100 },
             REGISTRY_PATH,
-            mockPipeline(false)
+            mockProject(false)
         )
         registry._registry = {}
         registry._registry[`prog-${TEST_REV_A}`] = TEST_ENTRY
@@ -204,7 +204,7 @@ describe('Perdiodic Builds', () => {
             server,
             { artifacts_path: ARTIFACTS_PATH, build_interval: 0.100 },
             REGISTRY_PATH,
-            mockPipeline(true, false, true)
+            mockProject(true, false, true)
         )
         registry._registry = {}
         registry._registry[`prog-${TEST_REV_A}`] = TEST_ENTRY
@@ -222,7 +222,7 @@ describe('Perdiodic Builds', () => {
             server,
             { artifacts_path: ARTIFACTS_PATH, build_interval: 0.100 },
             REGISTRY_PATH,
-            mockPipeline(true, TEST_REV_B)
+            mockProject(true, TEST_REV_B)
         )
         registry._registry = {}
         registry._registry[`prog-${TEST_REV_A}`] = TEST_ENTRY
@@ -243,7 +243,7 @@ describe('Perdiodic Builds', () => {
             server,
             { artifacts_path: ARTIFACTS_PATH, build_interval: 0.100 },
             REGISTRY_PATH,
-            mockPipeline(true, TEST_REV_B, true)
+            mockProject(true, TEST_REV_B, true)
         )
         registry._registry = {}
         registry._registry[`prog-${TEST_REV_A}`] = TEST_ENTRY
@@ -261,7 +261,7 @@ describe('Perdiodic Builds', () => {
             server,
             { artifacts_path: ARTIFACTS_PATH, build_interval: 0.100 },
             REGISTRY_PATH,
-            mockPipeline(true, TEST_REV_B)
+            mockProject(true, TEST_REV_B)
         )
         registry.getProgram = () => true
         registry._registry = {}
