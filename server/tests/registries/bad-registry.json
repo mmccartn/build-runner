@@ -1,6 +1,6 @@
 {
-    "hello": {
+    "prog": {
         "status": "completed",
-        path: "../data/hello"
+        path: "../data/prog"
     }
 }

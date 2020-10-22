@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 const { ArgumentParser, ArgumentDefaultsHelpFormatter } = require('argparse')
 const { description, version } = require('./package.json')
-const { promises: { mkdir } } = require('fs')
+const { promises: { mkdir }, rmdirSync } = require('fs')
 const { Server } = require('ws-plus')
 const path = require('path')
 const PipelineClass = require('./src/pipeline.js')
@@ -22,43 +22,82 @@ const main = async function (
 
     const registry = new Registry(registryPath)
     await registry.setup()
-    // helper function to notify ws-clients of all individual registry updates
-    const updateRegistry = function(program, status, path) {
-        registry.update(program, status, path)
-        return server.broadcast('registry/update', { program, status })
+    // helper functions to notify ws-clients of all individual registry updates
+    const updateRegistry = function(name, revision, status, location) {
+        const entry = registry.update(name, revision, status, location)
+        return server.broadcast('registry/update', entry)
+    }
+    const removeRegistry = function(name, revision, artPath) {
+        const artifacts = path.join(artPath, revision, name)
+        rmdirSync(artifacts, { recursive: true })
+        registry.remove(name, revision)
+        const id = Registry.genId(name, revision)
+        return server.broadcast('registry/remove', { id })
     }
 
     // send list of current registered programs to any new clients
     server.on('connect', client => {
-        return client.send('programs/registered', registry.programs)
+        return client.send('programs/registered', registry.clone)
     })
 
     // listen for registration requests
     server.on('program/register', async ({ location }, client) => {
-        // get the program name from the basename of the program location (path)
-        const name = path.basename(location)
-        await updateRegistry(name, STATUS.building, location)
-        const onMessage = msg => client.send('build/output', { program: name, msg })
+        const pipeline = new Pipeline(location)
+        const name = pipeline.name
+        const onMessage = msg => {
+            return client.send('build/output', { program: name, msg })
+        }
+        if (!pipeline.exists) {
+            return onMessage(`No program found at: ${location}`)
+        }
+        let revision
         try {
-            await new Pipeline().run(name, location, artifacts_path, onMessage)
-            await updateRegistry(name, STATUS.completed)
+            revision = await pipeline.revision()
+        } catch (err) {
+            return onMessage(`Failed to get git revision for: ${name}`)
+        }
+        if (registry.getProgram(name, revision)) {
+            return onMessage(`Already registered program: ${name}`)
+        }
+        await updateRegistry(name, revision, STATUS.building, location)
+        try {
+            await pipeline.run(revision, artifacts_path, onMessage)
+            await updateRegistry(name, revision, STATUS.completed)
         } catch (err) {
             await onMessage(err.toString())
-            await updateRegistry(name, STATUS.failed)
+            await updateRegistry(name, revision, STATUS.failed)
         }
         return registry.save()
     })
 
     // schedule automatic asynchronous builds on an interval
     const autoBuildInterval = setInterval(async () => {
-        await Promise.all(registry.names.map(async name => {
-            await updateRegistry(name, STATUS.building)
+        await Promise.all(registry.programs.map(async program => {
+            const { name, revision, location } = program
+            const pipeline = new Pipeline(location)
+            if (pipeline.name !== name || !pipeline.exists) {
+                // the program has been (re)moved or renamed
+                return removeRegistry(name, revision, artifacts_path)
+            }
             try {
-                const { path } = registry.getProgram(name)
-                await new Pipeline().run(name, path, artifacts_path, () => {})
-                await updateRegistry(name, STATUS.completed)
+                await pipeline.update()
             } catch (err) {
-                await updateRegistry(name, STATUS.failed)
+                // ignore pull errors in favor of revision comparison
+            }
+            let newRev
+            try {
+                newRev = await pipeline.revision()
+            } catch (err) { // no longer a git repository
+                return removeRegistry(name, revision, artifacts_path)
+            }
+            if (newRev && !registry.getProgram(name, newRev)) {
+                await updateRegistry(name, newRev, STATUS.building, location)
+                try {
+                    await pipeline.run(newRev, artifacts_path, () => {})
+                    await updateRegistry(name, newRev, STATUS.completed)
+                } catch (err) {
+                    await updateRegistry(name, newRev, STATUS.failed)
+                }
             }
         }))
         return registry.save()

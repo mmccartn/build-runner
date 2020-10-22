@@ -46,11 +46,11 @@ describe('Run', () => {
         try {
             await base._run(['argb'])
         } catch (err) {
-            expect(err.toString()).toMatch(/Already running: \d+/)
+            expect(err.toString()).toMatch(/Process already exists on pid: \d+/)
         }
     })
 })
-it('should stop a running process', async () => {
+it('should stop a running process', () => {
     base._spawnProcess = () => new MockProc([])
     base._run(['arg'])
     const code = base.stop()

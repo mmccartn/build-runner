@@ -9,9 +9,10 @@ module.exports = class extends Base {
     }
     revision(cwd) {
         return new Promise(async (resolve, reject) => {
-            this.once('message', resolve)
+            const onMsg = new Promise(res => this.once('message', res))
             try {
                 await this._run(['rev-parse', '--short', 'HEAD'], cwd)
+                resolve(await onMsg)
             } catch (err) {
                 reject(err)
             }

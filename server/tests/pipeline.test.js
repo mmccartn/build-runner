@@ -31,45 +31,38 @@ const MockMake = function(willFail=false) {
 
 afterEach(() => rmdirSync(ARTIFACTS_PATH, { recursive: true }))
 
+it('should construct a pipeline', () => {
+    const pipeline = new Pipeline(TEST_PROG_PATH)
+    expect(pipeline.name).toBe(path.basename(TEST_PROG_PATH))
+    expect(pipeline._progPath).toBe(TEST_PROG_PATH)
+    expect(pipeline._git).toBeTruthy()
+    expect(pipeline._make).toBeTruthy()
+})
+it('should execute an update', async () => {
+    const pipeline = new Pipeline('')
+    pipeline._git = MockGit()
+    expect(await pipeline.update()).toBe(0)
+})
+it('should execute a revision', async () => {
+    const pipeline = new Pipeline('')
+    pipeline._git = MockGit()
+    expect(await pipeline.revision()).toBe(pipeline._git.revision())
+})
+it('should verify the program path exists', () => {
+    expect(new Pipeline(TEST_PROG_PATH).exists).toBeTruthy()
+})
 it('should run the pipeline', async () => {
-    const pipeline = new Pipeline()
+    const pipeline = new Pipeline(TEST_PROG_PATH)
     pipeline._git = MockGit()
     pipeline._make = MockMake()
     const msg = await new Promise(async resolve => {
         let msg
         await pipeline.run(
-            'test-prog',
-            TEST_PROG_PATH,
+            pipeline._git.revision(),
             ARTIFACTS_PATH,
             out => msg = out
         )
         resolve(msg)
     })
     expect(msg).toBe('make: build complete')
-})
-it('should run the pipeline even if git pull fails', async () => {
-    const pipeline = new Pipeline()
-    pipeline._git = MockGit(true)
-    pipeline._make = MockMake(true)
-    const msg = await new Promise(async resolve => {
-        let msg
-        await pipeline.run(
-            'test-prog',
-            TEST_PROG_PATH,
-            ARTIFACTS_PATH,
-            err => msg = err
-        )
-        resolve(msg)
-    })
-    expect(msg).toBe('git pull: Error: Fatal')
-})
-it('should not run the pipeline if program does not exist', async () => {
-    const pipeline = new Pipeline()
-    pipeline._git = MockGit()
-    pipeline._make = MockMake()
-    try {
-        await pipeline.run('data', '/foo/bar')
-    } catch (err) {
-        expect(err.toString()).toBe('Error: No program at location: /foo/bar')
-    }
 })

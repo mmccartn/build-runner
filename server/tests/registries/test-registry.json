@@ -1,10 +1,16 @@
 {
-    "goodby": {
+    "goodbye-095b65d": {
+        "id": "goodbye-095b65d",
+        "name": "goodbye",
+        "revision": "095b65d",
         "status": "failed",
-        "path": "bad/path"
+        "location": "../data/goodbye"
     },
-    "hello": {
+    "prog-f576889": {
+        "id": "prog-e68799a",
+        "name": "prog",
+        "revision": "e68799a",
         "status": "completed",
-        "path": "../data/hello"
+        "location": "../data/prog"
     }
 }

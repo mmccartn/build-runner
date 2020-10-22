@@ -13,7 +13,7 @@ module.exports = class extends EventEmitter {
     }
     _run(args, cwd=__dirname) {
         if (this._childProc) {
-            throw new Error(`Already running: ${this._childProc.pid}`)
+            throw new Error(`Process already exists on pid: ${this._childProc.pid}`)
         }
         this._childProc = this._spawnProcess(args || [], cwd)
         this._childProc.stdout.on('data', this._onStdout.bind(this))
