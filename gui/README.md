@@ -17,7 +17,7 @@ Development
 
 Deploy
 ------
-`npm run build` the site to `./public`
+`npm run build` the site to `./public/`, and host
 
 Configure
 ---------
