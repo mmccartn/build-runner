@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jest -iu --colors",
-    "start": "./index.js"
+    "start": "node ./index.js"
   },
   "author": "Matt McCartney <mattsmccartney@gmail.com>",
   "license": "MIT",
